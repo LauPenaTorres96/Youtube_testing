@@ -44,7 +44,7 @@ namespace YoutubeTests.PageObjects
             return WaitForElement(locator).GetAttribute(attributeName);
         }
 
-        protected void Click(By locator)
+        public void Click(By locator)
         {
             WaitForElement(locator).Click();
         }
