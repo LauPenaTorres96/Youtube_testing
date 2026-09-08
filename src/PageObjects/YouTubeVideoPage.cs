@@ -14,45 +14,113 @@ namespace YoutubeTests.PageObjects
         
         // Ad-related locators
         private By SkipAdButton = By.ClassName("ytp-skip-ad-button");
-        private By AdContainer = By.ClassName("video-ads");
+        private By AdProgressBar = By.ClassName("ytp-ad-persistent-progress-bar");
 
         public YouTubeVideoPage(IWebDriver driver) : base(driver)
         {
         }
 
+        public bool IsAdProgressComplete()
+        {
+            try
+            {
+                var progressBars = Driver.FindElements(AdProgressBar);
+                if (progressBars.Count > 0)
+                {
+                    string widthStyle = progressBars[0].GetAttribute("style");
+                    // Check if width is 100% (ad finished)
+                    if (widthStyle.Contains("width: 100%"))
+                    {
+                        System.Diagnostics.Debug.WriteLine("Ad progress bar is at 100%");
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error checking ad progress: {ex.Message}");
+            }
+            return false;
+        }
+
         public void WaitForAdToFinishOrSkip()
         {
-            // Wait up to 20 seconds for either the ad to finish or skip button to appear
-            int maxAttempts = 20;
+            System.Diagnostics.Debug.WriteLine("Starting ad handling...");
             int attemptCount = 0;
+            const int maxAttempts = 600; // Wait up to 10 minutes (600 seconds with 1 second intervals)
+            bool skipButtonClicked = false;
 
             while (attemptCount < maxAttempts)
             {
                 try
                 {
-                    // Check if skip button is present and visible
-                    var skipButtons = Driver.FindElements(SkipAdButton);
-                    if (skipButtons.Count > 0 && skipButtons[0].Displayed)
+                    // Check if ad progress is complete
+                    if (IsAdProgressComplete())
                     {
+                        System.Diagnostics.Debug.WriteLine("Ad finished! Progress bar at 100%");
+                        System.Threading.Thread.Sleep(2000); // Wait for video to start
+                        break;
+                    }
+
+                    // Check if skip button is present
+                    var skipButtons = Driver.FindElements(SkipAdButton);
+                    if (skipButtons.Count > 0 && !skipButtonClicked)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Skip button found! Attempt: {attemptCount}");
+                        
                         try
                         {
-                            skipButtons[0].Click();
-                            System.Threading.Thread.Sleep(1000); // Wait after clicking skip
-                            break; // Exit loop after skipping
+                            // Wait a moment for the button to be fully clickable
+                            System.Threading.Thread.Sleep(500);
+                            
+                            IWebElement skipButton = skipButtons[0];
+                            
+                            // Try regular click first
+                            try
+                            {
+                                skipButton.Click();
+                                System.Diagnostics.Debug.WriteLine("Skip button clicked successfully");
+                                skipButtonClicked = true;
+                                System.Threading.Thread.Sleep(2000); // Wait after clicking skip
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Regular click failed: {ex.Message}, trying JavaScript click");
+                                
+                                // Fallback to JavaScript click
+                                try
+                                {
+                                    ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", skipButton);
+                                    System.Diagnostics.Debug.WriteLine("JavaScript click successful");
+                                    skipButtonClicked = true;
+                                    System.Threading.Thread.Sleep(2000); // Wait after clicking skip
+                                }
+                                catch (Exception jsEx)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"JavaScript click also failed: {jsEx.Message}");
+                                }
+                            }
                         }
                         catch (Exception ex)
                         {
-                            // Skip button might not be clickable yet, continue waiting
-                            System.Diagnostics.Debug.WriteLine($"Could not click skip button: {ex.Message}");
+                            System.Diagnostics.Debug.WriteLine($"Error handling skip button: {ex.Message}");
                         }
                     }
 
                     // Check if video content has loaded (watch info is visible)
                     var watchInfoElements = Driver.FindElements(WatchInfoContainer);
-                    if (watchInfoElements.Count > 0 && watchInfoElements[0].Displayed)
+                    if (watchInfoElements.Count > 0)
                     {
-                        // Video has loaded, exit the loop
-                        break;
+                        try
+                        {
+                            if (watchInfoElements[0].Displayed)
+                            {
+                                System.Diagnostics.Debug.WriteLine("Video page loaded successfully");
+                                // Video has loaded, exit the loop
+                                break;
+                            }
+                        }
+                        catch { }
                     }
 
                     attemptCount++;
