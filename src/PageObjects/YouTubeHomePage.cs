@@ -7,7 +7,6 @@ namespace YoutubeTests.PageObjects
     {
         // Locators
         private By SearchBox = By.Name("search_query");
-        private By SearchButton = By.Id("search-icon-legacy");
 
         public YouTubeHomePage(IWebDriver driver) : base(driver)
         {
@@ -16,12 +15,15 @@ namespace YoutubeTests.PageObjects
         public void NavigateTo(string baseUrl)
         {
             Driver.Navigate().GoToUrl(baseUrl);
+            System.Threading.Thread.Sleep(2000); // Wait for YouTube to load
         }
 
         public void SearchForVideo(string searchQuery)
         {
             SendKeys(SearchBox, searchQuery);
-            Click(SearchButton);
+            // Press Enter instead of clicking button - more reliable
+            Driver.FindElement(SearchBox).SendKeys(Keys.Enter);
+            System.Threading.Thread.Sleep(3000); // Wait for search results to load
         }
     }
 }
