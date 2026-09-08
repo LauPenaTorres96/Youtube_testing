@@ -1,5 +1,6 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using System;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 using YoutubeTests.Configuration;

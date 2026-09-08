@@ -19,24 +19,24 @@ namespace YoutubeTests.Tests
             homePage.SearchForVideo(AppSettings.YoutubeSettings.SearchQuery);
 
             // Wait for search results to load
-            Assert.IsTrue(searchResultsPage.GetVideoCount() > 0, "Search results should contain at least one video");
+            Assert.That(searchResultsPage.GetVideoCount() > 0, "Search results should contain at least one video");
 
             // Capture view count from search results
             string viewCountFromSearch = searchResultsPage.GetVideoViewCount(1);
-            Assert.IsFalse(string.IsNullOrEmpty(viewCountFromSearch), "View count should be visible in search results");
+            Assert.That(!string.IsNullOrEmpty(viewCountFromSearch), "View count should be visible in search results");
 
             // Click on the first video
             searchResultsPage.ClickOnVideo(1);
 
             // Wait for video page to load
-            Assert.IsTrue(videoPage.IsVideoPageLoaded(), "Video page should load successfully");
+            Assert.That(videoPage.IsVideoPageLoaded(), "Video page should load successfully");
 
             // Capture view count from video page
             string viewCountFromVideoPage = videoPage.GetViewCount();
-            Assert.IsFalse(string.IsNullOrEmpty(viewCountFromVideoPage), "View count should be visible on video page");
+            Assert.That(!string.IsNullOrEmpty(viewCountFromVideoPage), "View count should be visible on video page");
 
             // Assert - Verify the view counts match
-            Assert.AreEqual(viewCountFromSearch, viewCountFromVideoPage,
+            Assert.That(viewCountFromVideoPage, Is.EqualTo(viewCountFromSearch),
                 $"View count from search results '{viewCountFromSearch}' should match the count on video page '{viewCountFromVideoPage}'");
         }
     }
