@@ -4,11 +4,13 @@ namespace YoutubeTests.PageObjects
 {
     public class YouTubeSearchResultsPage : BasePage
     {
-        // Locators for video items in search results
-        private By VideoItems = By.XPath("//div[@id='contents']//ytd-video-renderer");
-        private By VideoTitle(int index) => By.XPath($"(//div[@id='contents']//ytd-video-renderer)[{index}]//a[@id='video-title']");
-        private By VideoViewCount(int index) => By.XPath($"(//div[@id='contents']//ytd-video-renderer)[{index}]//span[contains(text(), 'views')]");
-        private By VideoUploadDate(int index) => By.XPath($"(//div[@id='contents']//ytd-video-renderer)[{index}]//span[@class='style-scope yt-formatted-string'][contains(text(), 'ago') or contains(text(), 'Streamed')]");
+        // Locators for video items in search results (excluding ads)
+        private By VideoItems = By.XPath("//div[@id='contents']//ytd-video-renderer[not(ancestor::ytd-ad-slot-renderer)]");
+        private By VideoTitle(int index) => By.XPath($"(//div[@id='contents']//ytd-video-renderer[not(ancestor::ytd-ad-slot-renderer)])[{index}]//a[@id='video-title']");
+        
+        // Use the metadata-line spans for view count and upload date
+        private By VideoViewCount(int index) => By.XPath($"(//div[@id='contents']//ytd-video-renderer[not(ancestor::ytd-ad-slot-renderer)])[{index}]//span[@class='inline-metadata-item style-scope ytd-video-meta-block'][contains(text(), 'views')]");
+        private By VideoUploadDate(int index) => By.XPath($"(//div[@id='contents']//ytd-video-renderer[not(ancestor::ytd-ad-slot-renderer)])[{index}]//span[@class='inline-metadata-item style-scope ytd-video-meta-block'][contains(text(), 'ago') or contains(text(), 'Streamed')]");
 
         public YouTubeSearchResultsPage(IWebDriver driver) : base(driver)
         {
