@@ -1,17 +1,73 @@
 using OpenQA.Selenium;
+using System;
+using System.Threading;
 
 namespace YoutubeTests.PageObjects
 {
     public class YouTubeVideoPage : BasePage
     {
-        // Locators for video page elements - using ytd-watch-info-text for reliability
+        // Locators for video page elements
         private By VideoTitle = By.XPath("//h1[@class='style-scope ytd-video-primary-info-renderer']//yt-formatted-string");
         private By WatchInfoContainer = By.XPath("//ytd-watch-info-text[@id='ytd-watch-info-text']");
         private By ChannelName = By.XPath("//ytd-channel-name//a[@class='yt-simple-endpoint style-scope yt-formatted-string']");
         private By VideoDuration = By.XPath("//span[@class='style-scope yt-formatted-string'][contains(text(), ':')]");
+        
+        // Ad-related locators
+        private By SkipAdButton = By.ClassName("ytp-skip-ad-button");
+        private By AdContainer = By.ClassName("video-ads");
 
         public YouTubeVideoPage(IWebDriver driver) : base(driver)
         {
+        }
+
+        public void WaitForAdToFinishOrSkip()
+        {
+            // Wait up to 20 seconds for either the ad to finish or skip button to appear
+            int maxAttempts = 20;
+            int attemptCount = 0;
+
+            while (attemptCount < maxAttempts)
+            {
+                try
+                {
+                    // Check if skip button is present and visible
+                    var skipButtons = Driver.FindElements(SkipAdButton);
+                    if (skipButtons.Count > 0 && skipButtons[0].Displayed)
+                    {
+                        try
+                        {
+                            skipButtons[0].Click();
+                            System.Threading.Thread.Sleep(1000); // Wait after clicking skip
+                            break; // Exit loop after skipping
+                        }
+                        catch (Exception ex)
+                        {
+                            // Skip button might not be clickable yet, continue waiting
+                            System.Diagnostics.Debug.WriteLine($"Could not click skip button: {ex.Message}");
+                        }
+                    }
+
+                    // Check if video content has loaded (watch info is visible)
+                    var watchInfoElements = Driver.FindElements(WatchInfoContainer);
+                    if (watchInfoElements.Count > 0 && watchInfoElements[0].Displayed)
+                    {
+                        // Video has loaded, exit the loop
+                        break;
+                    }
+
+                    attemptCount++;
+                    System.Threading.Thread.Sleep(1000); // Wait 1 second before next check
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error waiting for ad: {ex.Message}");
+                    attemptCount++;
+                    System.Threading.Thread.Sleep(1000);
+                }
+            }
+
+            // Final wait to ensure video is fully loaded
+            System.Threading.Thread.Sleep(2000);
         }
 
         public string GetVideoTitle()
@@ -59,6 +115,10 @@ namespace YoutubeTests.PageObjects
 
         public bool IsVideoPageLoaded()
         {
+            // Call WaitForAdToFinishOrSkip to handle ads first
+            WaitForAdToFinishOrSkip();
+            
+            // Then check if video page elements are present
             return WaitForElementPresence(VideoTitle) && WaitForElementPresence(WatchInfoContainer);
         }
     }
