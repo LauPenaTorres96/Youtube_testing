@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using YoutubeTests.PageObjects;
+using System;
 
 namespace YoutubeTests.Tests
 {
@@ -35,9 +36,17 @@ namespace YoutubeTests.Tests
             string titleFromVideoPage = videoPage.GetVideoTitle();
             Assert.That(!string.IsNullOrEmpty(titleFromVideoPage), "Video title should be visible on video page");
 
+            // 💡 Add explicit verification logs to your console stream
+            Console.WriteLine($"[INFO] Comparing search title against watch page title...");
+            Console.WriteLine($"       -> Title from Search Results: '{titleFromSearch}'");
+            Console.WriteLine($"       -> Title from Video Page:     '{titleFromVideoPage}'");
+
             // Assert - Verify the titles match
             Assert.That(titleFromVideoPage, Is.EqualTo(titleFromSearch),
                 $"Title from search results '{titleFromSearch}' should match the title on video page '{titleFromVideoPage}'");
+
+            // 💡 Log a successful verification event if the assertion passes
+            Console.WriteLine("[SUCCESS] ✅ Video titles match perfectly!");
         }
     }
 }

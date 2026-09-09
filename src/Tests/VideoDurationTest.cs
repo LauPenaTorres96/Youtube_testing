@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using YoutubeTests.PageObjects;
+using System;
 
 namespace YoutubeTests.Tests
 {
@@ -21,6 +22,9 @@ namespace YoutubeTests.Tests
             // Wait for search results to load
             Assert.That(searchResultsPage.GetVideoCount() > 0, "Search results should contain at least one video");
 
+            string durationFromSearchPage = searchResultsPage.GetVideoDurationByIndex(1);
+            Assert.That(!string.IsNullOrEmpty(durationFromSearchPage), "Video duration badge should be visible in search results");
+
             // Click on the first video
             searchResultsPage.ClickOnVideo(1);
 
@@ -31,9 +35,18 @@ namespace YoutubeTests.Tests
             string durationFromVideoPage = videoPage.GetVideoDuration();
             Assert.That(!string.IsNullOrEmpty(durationFromVideoPage), "Video duration should be visible on video page");
 
-            // Assert - Verify duration is displayed
-            Assert.That(durationFromVideoPage, Is.Not.Empty, "Video duration should not be empty");
+            Console.WriteLine($"[INFO] Comparing search list runtime against live player asset timeline...");
+            Console.WriteLine($"       -> Duration from Search Badge: '{durationFromSearchPage}'");
+            Console.WriteLine($"       -> Duration from Player API:    '{durationFromVideoPage}'");
+
+            // Assert - Verify the structural time layout contains a colon separator
             Assert.That(durationFromVideoPage.Contains(":"), "Video duration should be in time format (HH:MM:SS or MM:SS)");
+
+            // 💡 NEW ASSERTION: Verify the parsed runtimes are completely identical
+            Assert.That(durationFromVideoPage, Is.EqualTo(durationFromSearchPage),
+                $"Duration from search results '{durationFromSearchPage}' should match the watch player duration '{durationFromVideoPage}'");
+
+            Console.WriteLine("[SUCCESS] ✅ Video durations match perfectly across search and playback views!");
         }
     }
 }

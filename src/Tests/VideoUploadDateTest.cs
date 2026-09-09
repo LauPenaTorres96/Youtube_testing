@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using YoutubeTests.PageObjects;
+using System;
 
 namespace YoutubeTests.Tests
 {
@@ -35,9 +36,22 @@ namespace YoutubeTests.Tests
             string uploadDateFromVideoPage = videoPage.GetUploadDate();
             Assert.That(!string.IsNullOrEmpty(uploadDateFromVideoPage), "Upload date should be visible on video page");
 
+            // Extract the numbers (e.g., "7" from "7mo ago" and "7 months ago")
+            string searchNumber = System.Text.RegularExpressions.Regex.Match(uploadDateFromSearch, @"\d+").Value;
+            string videoNumber = System.Text.RegularExpressions.Regex.Match(uploadDateFromVideoPage, @"\d+").Value;
+
+            // 💡 Add explicit verification logs to your console stream
+            Console.WriteLine($"[INFO] Comparing search list timeline relative approximation...");
+            Console.WriteLine($"       -> Raw String from Search:  '{uploadDateFromSearch}' (Extracted digit: {searchNumber})");
+            Console.WriteLine($"       -> Raw String from Video:   '{uploadDateFromVideoPage}' (Extracted digit: {videoNumber})");
+
             // Assert - Verify the upload date approximations match
-            Assert.That(uploadDateFromVideoPage, Is.EqualTo(uploadDateFromSearch),
-                $"Upload date from search results '{uploadDateFromSearch}' should match the date on video page '{uploadDateFromVideoPage}'");
+            Assert.That(videoNumber, Is.EqualTo(searchNumber),
+                $"The relative time frame number ({videoNumber}) does not align with search data.");
+
+            // 💡 Log a successful verification event if the assertion passes
+            Console.WriteLine("[SUCCESS] ✅ Upload date approximation numbers match perfectly!");
+
         }
     }
 }

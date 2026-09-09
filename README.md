@@ -4,15 +4,15 @@ A comprehensive C# Selenium WebDriver testing suite for YouTube UI automation us
 
 ## Project Overview
 
-This project demonstrates 5 automated test cases that verify data consistency across multiple YouTube pages. Each test scenario uses modular JSON configuration for maintainability.
+This project demonstrates 5 automated test cases that verify data consistency across multiple YouTube pages. Each test scenario uses modular JSON configuration and explicit console test stream tracking wrappers for long-term maintainability.
 
 ## Test Scenarios
 
-1. **Video Upload Date Approximation** - Verify upload date shown in search results matches video page
-2. **Video View Count Consistency** - Verify view counts are consistent across search results and video page
-3. **Video Title Consistency** - Verify video titles match between search results and video page
-4. **Channel Name Consistency** - Verify channel names match across video page and channel page
-5. **Video Duration Display** - Verify video duration is correctly displayed on video page
+1. **Video Upload Date Approximation** - Verify relative timeline approximation metrics (`7mo ago` vs `7 months ago`) align between search results and the watch page player.
+2. **Video View Count Consistency** - Verify view counts are consistent across search displays and the main watch metadata fields.
+3. **Video Title Consistency** - Verify video titles match perfectly between the search results list and the video page frame layout.
+4. **Channel Name Consistency** - Verify creator channel names match across the video playback view and the modern channel profile page.
+5. **Video Duration Display** - Verify video duration is correctly displayed on the video page and matches the thumbnail run time status badge.
 
 ## Project Structure
 
@@ -53,11 +53,20 @@ Contains all 5 test scenarios with descriptions and expected behaviors.
 
 ## Technologies Used
 
-- **C# .NET 8.0** - Programming language and runtime
-- **Selenium WebDriver 4.15** - Browser automation
-- **NUnit 4.0** - Testing framework
-- **WebDriverManager 2.16** - Automatic driver management
-- **Newtonsoft.Json 13.0** - JSON configuration parsing
+- **C# .NET 8.0** - Core programming language framework and compiler target
+- **Selenium WebDriver 4.15+** - Core browser automation driver bindings
+- **NUnit 4.5.0** - Central test assertion configuration engine
+- **NUnit3TestAdapter 4.5.0** - Visual Studio IDE Test Explorer integration listener
+- **WebDriverManager 2.17.0** - Automated ChromeDriver resolution management
+- **Newtonsoft.Json 13.0** - Configuration file deserializer library
+
+## Notes
+
+- **Resilient Modern Selectors:** To protect scripts against YouTube's active A/B layout deployments and custom Web Components (`yt-dynamic-text-view-model`), long index XPaths have been removed entirely. Elements are tracked via lightweight, flat class name collections (`ytd-video-renderer`), filtering out list locations via clean C# zero-indexed array tracking wrappers.
+- **Shadow DOM and Hidden Layout Extraction:** For elements subject to intermittent visibility states (like the fading video player tracking bar or asynchronous layout frames), selectors are targeted directly at inner content spans using fallback methods like `.GetAttribute("textContent")` to prevent framework sync timeouts.
+- **Pre-Roll Ad Isolation:** The duration verification workflow avoids layout interference entirely by executing native JavaScript runtime hooks directly against YouTube's player layer (`movie_player.getDuration()`), allowing accurate tracking even if ad clips are processing over the active browser layout canvas.
+- **Console Traceability:** The test scripts incorporate informational logging banners (`[INFO]`, `[SUCCESS]`, `[WARN]`) written to the standard terminal stream, allowing clear trace visibility during debugging runs (`--verbosity normal`).
+
 
 ## Getting Started
 

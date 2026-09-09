@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using YoutubeTests.PageObjects;
+using System;
 
 namespace YoutubeTests.Tests
 {
@@ -35,9 +36,18 @@ namespace YoutubeTests.Tests
             string viewCountFromVideoPage = videoPage.GetViewCount();
             Assert.That(!string.IsNullOrEmpty(viewCountFromVideoPage), "View count should be visible on video page");
 
+            // 💡 Add explicit verification logs to your console stream
+            Console.WriteLine($"[INFO] Comparing search metrics against watch page metrics...");
+            Console.WriteLine($"       -> View Count from Search Results: '{viewCountFromSearch}'");
+            Console.WriteLine($"       -> View Count from Video Page:     '{viewCountFromVideoPage}'");
+
             // Assert - Verify the view counts match
             Assert.That(viewCountFromVideoPage, Is.EqualTo(viewCountFromSearch),
                 $"View count from search results '{viewCountFromSearch}' should match the count on video page '{viewCountFromVideoPage}'");
+
+            // 💡 Log a successful verification event if the assertion passes
+            Console.WriteLine("[SUCCESS] ✅ Video view counts match perfectly!");
+
         }
     }
 }

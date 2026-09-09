@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using OpenQA.Selenium;
 using YoutubeTests.PageObjects;
+using System;
 
 namespace YoutubeTests.Tests
 {
@@ -34,18 +35,27 @@ namespace YoutubeTests.Tests
             Assert.That(!string.IsNullOrEmpty(channelNameFromVideoPage), "Channel name should be visible on video page");
 
             // Click on channel name to navigate to channel page
-            videoPage.Click(By.XPath("//ytd-channel-name//a[@class='yt-simple-endpoint style-scope yt-formatted-string']"));
+            videoPage.ClickChannelLink();
 
             // Wait for channel page to load
+            System.Threading.Thread.Sleep(2000);
             Assert.That(channelPage.IsChannelPageLoaded(), "Channel page should load successfully");
 
             // Capture channel name from channel page
             string channelNameFromChannelPage = channelPage.GetChannelName();
             Assert.That(!string.IsNullOrEmpty(channelNameFromChannelPage), "Channel name should be visible on channel page");
 
+            // 💡 Add explicit verification logs to your console stream
+            Console.WriteLine($"[INFO] Comparing watch page creator name against profile header title...");
+            Console.WriteLine($"       -> Channel Name from Video Page:   '{channelNameFromVideoPage}'");
+            Console.WriteLine($"       -> Channel Name from Channel Page: '{channelNameFromChannelPage}'");
+
             // Assert - Verify channel names match
             Assert.That(channelNameFromChannelPage, Is.EqualTo(channelNameFromVideoPage),
                 $"Channel name from video page '{channelNameFromVideoPage}' should match channel page '{channelNameFromChannelPage}'");
+
+            // 💡 Log a successful verification event if the assertion passes
+            Console.WriteLine("[SUCCESS] ✅ Channel names match perfectly across pages!");
         }
     }
 }
